@@ -27,6 +27,28 @@ curl -LsSf https://astral.sh/uv/install.sh | sh && uv tool install agentwin && a
 
 That's it — no interactive prompts, no dependencies to figure out. The tool is now available as the `agentwin` command.
 
+#### Install as an AI agent skill (`npx skills add`)
+
+The `agentwin` skill (this repo's `skills/agentwin/SKILL.md`) is consumable by any agent in the open [Vercel Skills](https://www.npmjs.com/package/skills) ecosystem (Claude Code, OpenCode, Cursor, Codex, Antigravity, etc.) via the `npx skills` CLI:
+
+```bash
+# Install the agentwin skill into a specific agent
+npx skills add https://github.com/xiaoka76/agentwin -s agentwin -a claude-code
+
+# Or install into ALL supported agents at once
+npx skills add https://github.com/xiaoka76/agentwin -s agentwin -a '*'
+```
+
+The `npx skills` tool is a Node.js package — it auto-downloads on first run, so no manual install is needed.
+
+#### 🤖 For AI agents: one-line install prompt
+
+Copy-paste this to your AI agent (Claude, Cursor, etc.):
+
+> Please install the **agentwin** skill for me. Run this exact command and report the result:
+> `npx skills add https://github.com/xiaoka76/agentwin -s agentwin -a '*'`
+> After it completes, verify with `npx skills list | grep agentwin` so I know it's active.
+
 #### Recommended: `uv tool install`
 
 ```bash
@@ -176,15 +198,27 @@ Full: /home/user/.config/agentwin/runs/a1b2c3d4/2026-07-12T22-30-15Z_sysinfo.md
 
 ### 安装
 
-#### 🚀 给 AI agent 的一键安装
+#### 作为 AI agent skill 安装（`npx skills add`）
 
-如果你是 AI agent，要为你的用户装 `agentwin`，**一行命令搞定**（缺 `uv` 就自动装，完了装 `agentwin`）：
+`agentwin` 的 skill（仓库里 `skills/agentwin/SKILL.md`）能被任何支持 [Vercel Skills](https://www.npmjs.com/package/skills) 生态的 agent（Claude Code、OpenCode、Cursor、Codex、Antigravity 等）通过 `npx skills` CLI 一键装上：
 
 ```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh && uv tool install agentwin && agentwin --version
+# 把 agentwin skill 装到指定 agent
+npx skills add https://github.com/xiaoka76/agentwin -s agentwin -a claude-code
+
+# 一次性装到所有支持的 agent
+npx skills add https://github.com/xiaoka76/agentwin -s agentwin -a '*'
 ```
 
-完事——没有交互提示，没有依赖要操心。装完 `agentwin` 命令就能用了。
+`npx skills` 是 Node.js 包，首次运行会自动下载，**不用手动装**。
+
+#### 🤖 给 AI agent 的一键安装提示
+
+直接把下面这段发给 AI agent（Claude、Cursor 等）：
+
+> 请帮我安装 **agentwin** skill。跑这条命令并把结果贴给我：
+> `npx skills add https://github.com/xiaoka76/agentwin -s agentwin -a '*'`
+> 装完后跑 `npx skills list | grep agentwin` 验证一下，让我知道已经激活了。
 
 #### 推荐：`uv tool install`
 
