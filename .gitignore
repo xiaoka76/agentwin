@@ -15,3 +15,6 @@ env/
 .uv-cache/
 *.log
 .DS_Store
+
+# session-local notes
+*_TODO.md
