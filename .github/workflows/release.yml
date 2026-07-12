@@ -1,0 +1,54 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - "v*"
+
+jobs:
+  release:
+    name: build + publish + github release
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write   # 创建 GitHub Release 要写权限
+      id-token: write   # 给 PyPI Trusted Publishing 留口子（可选）
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@v4
+
+      - name: Set up Python
+        run: uv python install 3.12
+
+      - name: Install dependencies
+        run: uv sync --all-groups
+
+      - name: Run tests
+        run: uv run pytest -v
+
+      - name: Build distributions
+        run: uv build
+
+      - name: Publish to PyPI
+        # 0.1.0 已经在 PyPI 上了，所以这里加 skip-existing：
+        #   - 重新打 v0.1.0 tag 时不会爆
+        #   - 真正发新版本（v0.1.1+）正常推
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
+          packages-dir: dist/
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+
+      - name: Create GitHub Release
+        # 自动把 wheel + sdist 挂到 release 页，再也不用手动点
+        uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            dist/*.whl
+            dist/*.tar.gz
+          generate_release_notes: true
+          draft: false
+          prerelease: false
