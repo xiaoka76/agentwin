@@ -31,19 +31,11 @@ jobs:
       - name: Build distributions
         run: uv build
 
-      - name: Publish to PyPI
-        # 0.1.0 已经在 PyPI 上了，所以这里加 skip-existing：
-        #   - 重新打 v0.1.0 tag 时不会爆
-        #   - 真正发新版本（v0.1.1+）正常推
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          skip-existing: true
-          packages-dir: dist/
-        env:
-          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+      # 1) 先建 GitHub Release（成功→拿到官方下载页）
+      # 2) 再尝试发 PyPI（缺 secret 也不挂，单独告警）
+      # 这样保证：哪怕没配 PyPI token，GitHub Release 页也能照常生成
 
       - name: Create GitHub Release
-        # 自动把 wheel + sdist 挂到 release 页，再也不用手动点
         uses: softprops/action-gh-release@v2
         with:
           files: |
@@ -52,3 +44,14 @@ jobs:
           generate_release_notes: true
           draft: false
           prerelease: false
+          fail_on_unmatched_files: true
+
+      - name: Publish to PyPI
+        # 缺 token / 0.1.0 已存在 时优雅跳过，不让整个 workflow 红
+        continue-on-error: true
+        uses: pypa/gh-action-pypi-publish@release/v1
+        with:
+          skip-existing: true
+          packages-dir: dist/
+        env:
+          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
