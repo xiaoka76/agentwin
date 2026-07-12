@@ -17,17 +17,7 @@
 
 ### Installation
 
-#### 🚀 For AI agents: one-liner install
-
-If you are an AI agent setting up `agentwin` for your user, run this **single command** (it auto-installs `uv` if missing, then installs `agentwin`):
-
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh && uv tool install agentwin && agentwin --version
-```
-
-That's it — no interactive prompts, no dependencies to figure out. The tool is now available as the `agentwin` command.
-
-#### Install as an AI agent skill (`npx skills add`)
+#### 🎯 Recommended: install as an AI agent skill (`npx skills add`)
 
 The `agentwin` skill (this repo's `skills/agentwin/SKILL.md`) is consumable by any agent in the open [Vercel Skills](https://www.npmjs.com/package/skills) ecosystem (Claude Code, OpenCode, Cursor, Codex, Antigravity, etc.) via the `npx skills` CLI:
 
@@ -49,7 +39,7 @@ Copy-paste this to your AI agent (Claude, Cursor, etc.):
 > `npx skills add https://github.com/xiaoka76/agentwin -s agentwin -a '*'`
 > After it completes, verify with `npx skills list | grep agentwin` so I know it's active.
 
-#### Recommended: `uv tool install`
+#### Alternative: `uv tool install`
 
 ```bash
 # Install uv (if not already installed)
@@ -62,7 +52,7 @@ uv tool install agentwin
 agentwin --version
 ```
 
-#### npx-style: `uvx` (run without installing)
+#### Run without installing: `uvx`
 
 `uvx` is the Python equivalent of `npx` — it downloads, runs, and discards. Perfect for one-off commands or trying it out:
 
@@ -76,13 +66,7 @@ uvx agentwin --help
 uvx --from agentwin agentwin --version
 ```
 
-#### Alternative: `pipx`
-
-```bash
-pipx install agentwin
-```
-
-#### From source (for contributors)
+#### From source (contributors)
 
 ```bash
 git clone https://github.com/xiaoka76/agentwin.git
@@ -198,7 +182,7 @@ Full: /home/user/.config/agentwin/runs/a1b2c3d4/2026-07-12T22-30-15Z_sysinfo.md
 
 ### 安装
 
-#### 作为 AI agent skill 安装（`npx skills add`）
+#### 🎯 推荐：作为 AI agent skill 安装（`npx skills add`）
 
 `agentwin` 的 skill（仓库里 `skills/agentwin/SKILL.md`）能被任何支持 [Vercel Skills](https://www.npmjs.com/package/skills) 生态的 agent（Claude Code、OpenCode、Cursor、Codex、Antigravity 等）通过 `npx skills` CLI 一键装上：
 
@@ -220,7 +204,7 @@ npx skills add https://github.com/xiaoka76/agentwin -s agentwin -a '*'
 > `npx skills add https://github.com/xiaoka76/agentwin -s agentwin -a '*'`
 > 装完后跑 `npx skills list | grep agentwin` 验证一下，让我知道已经激活了。
 
-#### 推荐：`uv tool install`
+#### 备选：`uv tool install`
 
 ```bash
 # 装 uv（如果还没装）
@@ -233,7 +217,7 @@ uv tool install agentwin
 agentwin --version
 ```
 
-#### npx 风格：`uvx`（免安装直接跑）
+#### 免安装直接跑：`uvx`
 
 `uvx` 是 Python 的 `npx`——下载、运行、丢弃。适合临时跑命令或先体验一下：
 
@@ -247,13 +231,7 @@ uvx agentwin --help
 uvx --from agentwin agentwin --version
 ```
 
-#### 备选：`pipx`
-
-```bash
-pipx install agentwin
-```
-
-#### 从源码装（贡献者用）
+#### 从源码装
 
 ```bash
 git clone https://github.com/xiaoka76/agentwin.git

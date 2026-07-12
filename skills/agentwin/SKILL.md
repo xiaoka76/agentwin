@@ -19,10 +19,6 @@ Use this skill when you need to remotely manage a Windows machine (NAS, server, 
 - "List processes/services on Windows"
 - "Upload/download files to/from Windows"
 - "Manage my Windows server / NAS"
-- "远程管理 Windows 服务器"
-- "查看 Windows 系统信息"
-- "在远程 Windows 上执行命令"
-- "上传/下载文件到 Windows"
 
 ## Prerequisites
 
@@ -170,34 +166,34 @@ agentwin remove <uuid>
 - Auto-detected by `health` subcommand
 - Fallback chain: WinRM → SSH key → SSH password
 
-## Windows 启用 OpenSSH 服务器
+## Enabling OpenSSH Server on Windows
 
-在 Windows 上启用 SSH 服务后，即可使用 SFTP 传输大文件（不受 WinRM 限制）：
+Once SSH is enabled on Windows, you can transfer large files via SFTP (bypassing WinRM's size limitation):
 
 ```powershell
-# 查看 OpenSSH 安装状态
+# Check OpenSSH installation status
 Get-WindowsCapability -Online | Where-Object Name -like 'OpenSSH*'
 
-# 安装 OpenSSH 服务器
+# Install OpenSSH Server
 Add-WindowsCapability -Online -Name OpenSSH.Server~~~~0.0.1.0
 
-# 启动 sshd 服务
+# Start sshd service
 Start-Service sshd
 
-# 设置开机自启
+# Enable automatic startup
 Set-Service -Name sshd -StartupType 'Automatic'
 
-# 确保 TCP 22 端口已放行
+# Ensure TCP port 22 is allowed through firewall
 Get-NetFirewallRule -Name *OpenSSH-Server* | Select Name, Enabled
 
-# 如未启用，可手动添加规则
+# If not enabled, add the rule manually
 New-NetFirewallRule -Name sshd -DisplayName 'OpenSSH Server (sshd)' `
   -Enabled True -Direction Inbound -Protocol TCP -Action Allow -LocalPort 22
 
-# 注：默认配置下 SSH 可以使用用户名和密码登录
+# Note: by default, SSH accepts username/password login
 ```
 
-安装完成后，在 agentwin 中注册 SSH 连接：
+After setup, register the SSH connection in agentwin:
 
 ```bash
 agentwin auth <host> --user Administrator --password "your_password" --port 22
