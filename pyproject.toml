@@ -1,0 +1,56 @@
+[project]
+name = "agentwin"
+version = "0.1.0"
+description = "Agent-friendly Windows remote management CLI"
+readme = "README.md"
+license = { text = "MIT" }
+requires-python = ">=3.10"
+authors = [
+    { name = "xiaoka", email = "xiaoka@example.com" },
+]
+keywords = ["windows", "winrm", "ssh", "agent", "cli", "remote"]
+classifiers = [
+    "Development Status :: 4 - Beta",
+    "Environment :: Console",
+    "Intended Audience :: System Administrators",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: System :: Networking",
+    "Topic :: System :: Systems Administration",
+]
+dependencies = [
+    "typer>=0.12.0",
+    "rich>=13.0.0",
+    "pywinrm>=0.4.3",
+    "paramiko>=3.4.0",
+    "cryptography>=42.0.0",
+    "platformdirs>=4.0.0",
+]
+
+[project.scripts]
+agentwin = "agentwin.cli:app"
+
+[project.urls]
+Homepage = "https://github.com/xiaoka/agentwin"
+Issues = "https://github.com/xiaoka/agentwin/issues"
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/agentwin"]
+
+[tool.uv]
+dev-dependencies = [
+    "pytest>=8.0",
+    "pytest-cov>=4.1",
+]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-v --tb=short"
