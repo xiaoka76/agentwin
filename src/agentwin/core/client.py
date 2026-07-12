@@ -90,7 +90,7 @@ class RemoteClient:
             encoded = _encode_ps_command(script)
             return self.run_cmd(f"powershell -NoProfile -EncodedCommand {encoded}", timeout)
         session = self._winrm_session()
-        r = session.run_ps(script, timeout=timeout)
+        r = session.run_ps(script)
         return (
             r.status_code,
             r.std_out.decode("utf-8", errors="ignore"),
