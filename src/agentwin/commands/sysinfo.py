@@ -4,7 +4,7 @@ from typing import Optional
 
 import typer
 
-from agentwin.commands.execute import _resolve_host
+from agentwin.core.storage import resolve_host
 from agentwin.core.client import RemoteClient
 from agentwin.utils.clixml import clean
 from agentwin.utils.output import (
@@ -67,11 +67,15 @@ def sysinfo_cmd(
     no_save: bool = typer.Option(False, "--no-save"),
 ):
     """Collect comprehensive system information from the remote host."""
-    target, cred = _resolve_host(host)
+    try:
+        target, cred = resolve_host(host)
+    except ValueError as e:
+        raise typer.BadParameter(str(e))
     client = RemoteClient(cred)
     try:
         exit_code, stdout, stderr = client.run_ps(SYSINFO_SCRIPT)
     except Exception as e:
+        typer.echo(f"Error: {e}", err=True)
         raise typer.Exit(code=1) from e
     finally:
         client.close()
@@ -93,12 +97,12 @@ def sysinfo_cmd(
         "stderr": stderr_clean,
     }
 
-    run_dir = new_run_dir("sysinfo")
+    out_path = new_run_dir(target, "sysinfo")
     if not no_save:
-        out_path = output or (run_dir / "sysinfo.md")
         if output:
+            out_path = output
             output.parent.mkdir(parents=True, exist_ok=True)
-        write_full_markdown(run_dir, "sysinfo", {"host": target}, result)
+        write_full_markdown(out_path, "sysinfo", {"host": target}, result)
 
     if json_output:
         render_json(result)
@@ -114,7 +118,7 @@ def sysinfo_cmd(
             f"  CPU   {cpu_name or '?'}",
             f"  Mem   {_fmt_bytes(total_mem) if total_mem else '?'}",
         ]
-        render_concise("ok", target, lines, output or run_dir / "sysinfo.md")
+        render_concise("ok", target, lines, out_path)
 
 
 def _extract_field(text: str, field: str) -> Optional[str]:

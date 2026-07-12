@@ -1,4 +1,5 @@
 """list subcommand - list all saved hosts."""
+import json
 from pathlib import Path
 from typing import Optional
 
@@ -37,23 +38,22 @@ def list_cmd(
 
     result = {"hosts": host_list, "count": len(host_list)}
 
-    run_dir = new_run_dir("list")
+    out_file = new_run_dir("list", "list")
     if not no_save:
-        out_path = output or (run_dir / "list.md")
         if output:
             output.parent.mkdir(parents=True, exist_ok=True)
-        write_full_markdown(run_dir, "list", {}, result)
+        write_full_markdown(output or out_file, "list", {}, result)
 
     if json_output:
         render_json(result)
     elif quiet:
         return
     elif full:
-        render_full(__import__("json").dumps(result, indent=2))
+        render_full(json.dumps(result, indent=2))
     else:
         if not hosts:
             lines = ["(no hosts saved)"]
-            render_concise("ok", None, lines, output or run_dir / "list.md")
+            render_concise("ok", None, lines, output or out_file)
         else:
             for h in hosts:
                 name_part = f" ({h.name})" if h.name else ""
@@ -61,4 +61,4 @@ def list_cmd(
                     f"{h.uuid}{name_part}",
                     f"  {h.user}@{h.host}:{h.port} [{h.auth_method}]",
                 ]
-                render_concise("ok", None, lines, output or run_dir / "list.md")
+                render_concise("ok", None, lines, output or out_file)

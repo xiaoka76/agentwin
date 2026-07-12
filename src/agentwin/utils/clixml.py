@@ -6,9 +6,11 @@ PROGRESS_PATTERN = re.compile(r"<Obj S=\"progress\".*?</Obj>", re.DOTALL)
 
 
 def clean(text: str) -> str:
-    """Remove CLIXML blocks and progress records from text."""
+    """Remove CLIXML blocks, progress records, and empty lines from text."""
     if not text:
         return text
     text = CLIXML_PATTERN.sub("", text)
     text = PROGRESS_PATTERN.sub("", text)
-    return text.strip()
+    # Remove pure empty/whitespace-only lines to save output budget
+    lines = [line for line in text.split("\n") if line.strip()]
+    return "\n".join(lines)

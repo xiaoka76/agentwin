@@ -1,11 +1,11 @@
 """~/.config/agentwin/ storage layer."""
 import json
 from pathlib import Path
-from typing import List, Optional
+from typing import List, Optional, Tuple
 
 from platformdirs import user_config_dir
 
-from agentwin.core.auth import HostCredential, from_dict
+from agentwin.core.auth import HostCredential, from_dict, to_dict
 from agentwin.core.crypto import decrypt, encrypt
 
 APP_NAME = "agentwin"
@@ -43,7 +43,7 @@ def load_hosts() -> List[HostCredential]:
 
 
 def save_hosts(hosts: List[HostCredential]) -> None:
-    payload = {"hosts": [h.__dict__ for h in hosts]}
+    payload = {"hosts": [to_dict(h) for h in hosts]}
     hosts_path().write_text(
         json.dumps(payload, indent=2, ensure_ascii=False),
         encoding="utf-8",
@@ -86,3 +86,18 @@ def get_current() -> Optional[str]:
     if not p.exists():
         return None
     return p.read_text(encoding="utf-8").strip() or None
+
+
+def resolve_host(uuid: Optional[str]) -> Tuple[str, HostCredential]:
+    """Resolve a host UUID from arg or current file.
+
+    Returns (uuid, HostCredential) on success.
+    Raises ValueError if no host is specified or the UUID is not found.
+    """
+    target = uuid or get_current()
+    if not target:
+        raise ValueError("No host specified. Run `agentwin auth` first or pass --host.")
+    cred = get_host(target)
+    if not cred:
+        raise ValueError(f"Host UUID {target} not found in store.")
+    return target, cred

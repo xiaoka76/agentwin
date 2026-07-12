@@ -30,4 +30,9 @@ def to_dict(cred: HostCredential) -> dict:
 
 
 def from_dict(d: dict) -> HostCredential:
-    return HostCredential(**d)
+    """Deserialize from dict with validation."""
+    required = {"uuid", "host", "port", "user", "auth_method", "secret_enc"}
+    missing = required - d.keys()
+    if missing:
+        raise ValueError(f"Missing required fields: {missing}")
+    return HostCredential(**{k: v for k, v in d.items() if k in HostCredential.__dataclass_fields__})

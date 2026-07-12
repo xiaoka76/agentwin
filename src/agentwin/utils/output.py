@@ -10,31 +10,29 @@ from rich.console import Console
 from agentwin.core.storage import runs_dir
 
 console = Console()
-console_no_color = Console(no_color=True)
 
 
-def new_run_dir(subcmd: str) -> Path:
-    """Create a timestamped run directory under ~/.config/agentwin/runs/."""
+def new_run_dir(uuid: str, subcmd: str) -> Path:
+    """Create a timestamped run file under ~/.config/agentwin/runs/<uuid>/."""
     ts = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H-%M-%SZ")
-    d = runs_dir() / f"{ts}_{subcmd}"
+    d = runs_dir() / uuid
     d.mkdir(parents=True, exist_ok=True)
-    return d
+    return d / f"{ts}_{subcmd}.md"
 
 
 def write_full_markdown(
-    run_dir: Path,
+    out_path: Path,
     subcmd: str,
     params: Dict[str, Any],
     result: Dict[str, Any],
 ) -> Path:
-    """Write full result as markdown to run_dir/<subcmd>.md."""
-    out_path = run_dir / f"{subcmd}.md"
+    """Write full result as markdown to out_path."""
     lines = [
         f"# agentwin {subcmd} - Full Report",
         "",
         f"- **Timestamp**: {datetime.now(timezone.utc).isoformat()}",
         f"- **Host**: {socket.gethostname()}",
-        f"- **Run ID**: {run_dir.name}",
+        f"- **Run ID**: {out_path.stem}",
         "",
         "## Parameters",
         "",

@@ -31,14 +31,40 @@ agentwin health 10.0.0.20
 ```bash
 agentwin auth 10.0.0.20 --user Administrator --password "Liyuang1998"
 # 打印 UUID（12 位 hex），凭据已加密保存
+
+# 指定认证方式（默认端口 5985=WinRM，22=SSH，也可用 --method 显式指定）
+agentwin auth 10.0.0.20 --user Administrator --password "Liyuang1998" --method winrm-password
+agentwin auth 10.0.0.20 --user Administrator --password "Liyuang1998" --port 2222 --method ssh-password
+agentwin auth 10.0.0.20 --user Administrator --key ~/.ssh/id_rsa
 ```
 
 ### 4. 执行命令 / 采集系统信息
 
 ```bash
-agentwin execute --host a1b2c3d4 "ipconfig /all"
+# 默认走 PowerShell（推荐）
+agentwin execute --host a1b2c3d4 "Get-ChildItem C:\Users"
+# 指定走 cmd.exe
+agentwin execute --host a1b2c3d4 --cmd "ipconfig /all"
+# 采集系统信息
 agentwin sysinfo --host a1b2c3d4
+# 列出已认证的主机
 agentwin list
+```
+
+> **执行环境**：`execute` 和 `script` 默认使用 **PowerShell**（`session.run_ps()`），加 `--cmd` 回退到 cmd.exe（`session.run_cmd()`）。WinRM 和 SSH 协议行为一致。
+> SSH 下通过 `powershell -NoProfile -EncodedCommand <base64>` 显式调用 PowerShell（UTF-16LE 编码），不受 SSH 默认 shell 影响，且避免特殊字符注入问题。
+
+### 运行脚本
+
+```bash
+# 传脚本文件（默认 PowerShell）
+agentwin script --host a1b2c3d4 ./myscript.ps1
+# 显式指定走 cmd.exe
+agentwin script --host a1b2c3d4 --cmd ./myscript.bat
+
+# 或者用 --inline 直接传脚本内容（无需创建临时文件）
+agentwin script --host a1b2c3d4 --inline "Get-Service | Where-Object Status -eq Running"
+agentwin script --host a1b2c3d4 --cmd --inline "ipconfig /all"
 ```
 
 ## ⚠️ 输出格式约定（极其重要）
@@ -55,11 +81,11 @@ $ agentwin sysinfo
   Disk  C: 120G(89G free) | D: 64G(62G free) | 1 unmounted
   Net   10.0.0.20/23
 
-Full: /home/xiaoka/.config/agentwin/runs/2026-07-12T22-30-15Z/sysinfo.md
+Full: /home/xiaoka/.config/agentwin/runs/a1b2c3d4/2026-07-12T22-30-15Z_sysinfo.md
 ```
 
 - **stdout**：状态 + 一句话总结 + **完整路径**（关键！agent 通过路径按需读取）
-- **完整内容**：自动落盘到 `~/.config/agentwin/runs/<ISO时间戳>/<subcmd>.md`
+- **完整内容**：自动落盘到 `~/.config/agentwin/runs/<uuid>/<ISO时间戳>_<subcmd>.md`（`health` 子命令使用 host IP 代替 uuid）
 
 ### flag 速查
 
@@ -97,6 +123,16 @@ Full: /home/xiaoka/.config/agentwin/runs/2026-07-12T22-30-15Z/sysinfo.md
 - **自动探测**：`health` 子命令报告哪种协议可用
 
 > WinRM 协议本身**不支持 SSH 密钥认证**。但 Windows 自带的 OpenSSH 服务支持密钥，所以两条链路并存。
+
+## 📦 文件传输策略
+
+| 连接类型 | 文件大小 | 传输方式 |
+|---------|---------|---------|
+| SSH | 任意 | SFTP 直传（无大小限制，速度取决于网络带宽） |
+| WinRM | ≤ 1MB | Base64 分块上传（受 `powershell -encodedcommand` 命令行 8191 字符限制） |
+| WinRM | > 1MB | 报错提示用户使用 SSH 或 SMB |
+
+> WinRM 传输大文件会因协议开销极慢。建议在 Windows 上启用 OpenSSH 服务（见 skill 文档），然后用 `agentwin auth <host> --port 22` 注册 SSH 连接。
 
 ## 🆔 UUID 策略
 
@@ -139,7 +175,7 @@ agentwin/
 │   │   └── pull.py
 │   └── utils/
 │       ├── output.py           # 简洁 / 完整 / JSON 渲染
-│       └── clixml.py           # PowerShell CLIXML 噪音过滤
+│       └── clixml.py           # PowerShell CLIXML 过滤 + 纯空行裁剪
 ├── skills/agentwin/
 │   ├── SKILL.md                # QwenPaw skill 描述
 │   └── scripts/                # 包装脚本（可选）

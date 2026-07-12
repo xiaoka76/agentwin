@@ -30,11 +30,18 @@ agentwin health 10.0.0.20
 # 2. Authenticate — save encrypted credentials
 agentwin auth 10.0.0.20 --user Administrator --password "your_password"
 
+#    Or specify auth method explicitly (default: port 5985→WinRM, port 22→SSH)
+agentwin auth 10.0.0.20 --user Administrator --password "your_password" --method winrm-password
+agentwin auth 10.0.0.20 --user Administrator --password "your_password" --port 2222 --method ssh-password
+agentwin auth 10.0.0.20 --user Administrator --key ~/.ssh/id_rsa
+
 # 3. List saved hosts
 agentwin list
 
-# 4. Execute a command
-agentwin execute --host a1b2c3d4 "ipconfig /all"
+# 4. Execute a command (default: PowerShell)
+agentwin execute --host a1b2c3d4 "Get-ChildItem C:\Users"
+#    Use --cmd to run via cmd.exe instead
+agentwin execute --host a1b2c3d4 --cmd "ipconfig /all"
 
 # 5. Collect system information
 agentwin sysinfo --host a1b2c3d4
@@ -46,8 +53,8 @@ agentwin sysinfo --host a1b2c3d4
 |-------------|--------------------------------------------------|
 | `health`    | Scan target host for open ports and protocols    |
 | `auth`      | Authenticate and save encrypted credentials      |
-| `execute`   | Run a single command on remote host              |
-| `script`    | Run a PowerShell or CMD script file              |
+| `execute`   | Run a single command (default: PowerShell, `--cmd` for cmd.exe) |
+| `script`    | Run a PowerShell script (default) or CMD (`--cmd`) via file or `--inline` |
 | `sysinfo`   | Collect comprehensive system information         |
 | `list`      | List all saved hosts                             |
 | `remove`    | Remove a saved host by UUID                      |
@@ -66,7 +73,7 @@ $ agentwin sysinfo --host a1b2c3d4
   Disk  C: 120G(89G free) | D: 64G(62G free) | 1 unmounted
   Net   10.0.0.20/23
 
-Full: /home/user/.config/agentwin/runs/2026-07-12T22-30-15Z/sysinfo.md
+Full: /home/user/.config/agentwin/runs/a1b2c3d4/2026-07-12T22-30-15Z_sysinfo.md
 ```
 
 **Always read the full file** at the path shown in stdout for complete results.
@@ -101,6 +108,17 @@ Full: /home/user/.config/agentwin/runs/2026-07-12T22-30-15Z/sysinfo.md
 - **Auto-detection**: `health` subcommand reports which protocols are available
 - **Fallback chain**: WinRM → SSH key → SSH password
 
+### File Transfer Strategy
+
+| Protocol | File Size | Method |
+|----------|-----------|--------|
+| SSH | Any | SFTP direct transfer (no size limit, speed = network bandwidth) |
+| WinRM | ≤ 1MB | Base64 chunked upload (limited by `powershell -encodedcommand` 8191-char limit) |
+| WinRM | > 1MB | Error: prompts user to use SSH or SMB |
+
+> WinRM is not suitable for large files due to SOAP/XML protocol overhead.
+> Enable OpenSSH on Windows and use `agentwin auth <host> --port 22` for large file transfers.
+
 ---
 
 ## 中文
@@ -129,11 +147,18 @@ agentwin health 10.0.0.20
 # 2. 认证 — 保存加密凭据
 agentwin auth 10.0.0.20 --user Administrator --password "你的密码"
 
+#    也可用 --method 显式指定认证方式（默认端口 5985→WinRM，22→SSH）
+agentwin auth 10.0.0.20 --user Administrator --password "你的密码" --method winrm-password
+agentwin auth 10.0.0.20 --user Administrator --password "你的密码" --port 2222 --method ssh-password
+agentwin auth 10.0.0.20 --user Administrator --key ~/.ssh/id_rsa
+
 # 3. 列出已保存的主机
 agentwin list
 
-# 4. 执行命令
-agentwin execute --host a1b2c3d4 "ipconfig /all"
+# 4. 执行命令（默认 PowerShell）
+agentwin execute --host a1b2c3d4 "Get-ChildItem C:\Users"
+#    加 --cmd 改用 cmd.exe
+agentwin execute --host a1b2c3d4 --cmd "ipconfig /all"
 
 # 5. 采集系统信息
 agentwin sysinfo --host a1b2c3d4
@@ -145,8 +170,8 @@ agentwin sysinfo --host a1b2c3d4
 |-----------|--------------------------------|
 | `health`  | 扫描目标主机的开放端口和协议       |
 | `auth`    | 认证并保存加密凭据               |
-| `execute` | 在远程主机上执行单条命令          |
-| `script`  | 运行 PowerShell 或 CMD 脚本文件  |
+| `execute` | 执行单条命令（默认 PowerShell，`--cmd` 走 cmd.exe） |
+| `script`  | 运行 PowerShell（默认）或 CMD（`--cmd`）脚本（文件或 `--inline`） |
 | `sysinfo` | 采集全面的系统信息               |
 | `list`    | 列出所有已保存的主机             |
 | `remove`  | 按 UUID 删除已保存的主机         |
@@ -165,7 +190,7 @@ $ agentwin sysinfo --host a1b2c3d4
   Disk  C: 120G(89G free) | D: 64G(62G free) | 1 unmounted
   Net   10.0.0.20/23
 
-Full: /home/user/.config/agentwin/runs/2026-07-12T22-30-15Z/sysinfo.md
+Full: /home/user/.config/agentwin/runs/a1b2c3d4/2026-07-12T22-30-15Z_sysinfo.md
 ```
 
 **务必读取** stdout 末尾路径指向的完整文件以获取全部信息。
@@ -187,3 +212,13 @@ Full: /home/user/.config/agentwin/runs/2026-07-12T22-30-15Z/sysinfo.md
 
 - **自动探测**：`health` 子命令报告哪些协议可用
 - **降级链**：WinRM → SSH 密钥 → SSH 密码
+
+### 文件传输策略
+
+| 连接类型 | 文件大小 | 传输方式 |
+|---------|---------|---------|
+| SSH | 任意 | SFTP 直传（无大小限制，速度取决于网络带宽） |
+| WinRM | ≤ 1MB | Base64 分块上传（受 `powershell -encodedcommand` 命令行 8191 字符限制） |
+| WinRM | > 1MB | 报错提示用户使用 SSH 或 SMB |
+
+> WinRM 因 SOAP/XML 协议开销不适合传输大文件。建议在 Windows 上启用 OpenSSH 服务，然后用 `agentwin auth <host> --port 22` 注册 SSH 连接以支持大文件传输。

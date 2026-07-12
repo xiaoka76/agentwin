@@ -1,4 +1,5 @@
 """remove subcommand - remove a saved host by UUID."""
+import json
 from pathlib import Path
 from typing import Optional
 
@@ -31,23 +32,22 @@ def remove_cmd(
 
     result = {"uuid": uuid, "removed": removed}
 
-    run_dir = new_run_dir("remove")
+    out_file = new_run_dir("remove", "remove")
     if not no_save:
-        out_path = output or (run_dir / "remove.md")
         if output:
             output.parent.mkdir(parents=True, exist_ok=True)
-        write_full_markdown(run_dir, "remove", {"uuid": uuid}, result)
+        write_full_markdown(output or out_file, "remove", {"uuid": uuid}, result)
 
     if json_output:
         render_json(result)
     elif quiet:
         return
     elif full:
-        render_full(__import__("json").dumps(result, indent=2))
+        render_full(json.dumps(result, indent=2))
     else:
         if removed:
             lines = [f"Removed {uuid}"]
-            render_concise("ok", None, lines, output or run_dir / "remove.md")
+            render_concise("ok", None, lines, output or out_file)
         else:
             lines = [f"Host {uuid} not found"]
-            render_concise("error", None, lines, output or run_dir / "remove.md")
+            render_concise("error", None, lines, output or out_file)
