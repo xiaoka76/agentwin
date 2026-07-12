@@ -47,11 +47,6 @@ jobs:
           fail_on_unmatched_files: true
 
       - name: Publish to PyPI
-        # 缺 token / 0.1.0 已存在 时优雅跳过，不让整个 workflow 红
+        # 缺 token 时优雅跳过，不让整个 workflow 红
         continue-on-error: true
-        uses: pypa/gh-action-pypi-publish@release/v1
-        with:
-          skip-existing: true
-          packages-dir: dist/
-        env:
-          UV_PUBLISH_TOKEN: ${{ secrets.PYPI_API_TOKEN }}
+        run: uv publish --token "${{ secrets.PYPI_API_TOKEN }}"
