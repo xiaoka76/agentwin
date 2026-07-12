@@ -19,9 +19,17 @@ Use this skill when you need to remotely manage a Windows machine (NAS, server, 
 ## Prerequisites
 
 ```bash
-# Install (one-time)
-cd agentwin
-uv tool install -e .
+# Install (one-time, from PyPI)
+uv tool install agentwin
+
+# Or use the npx-style runner — no global install needed
+uvx agentwin --help
+```
+
+If `uv` is not installed yet, install it first:
+
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
 ```
 
 ## Workflow

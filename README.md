@@ -1,5 +1,10 @@
 # agentwin
 
+[![PyPI](https://img.shields.io/pypi/v/agentwin.svg)](https://pypi.org/project/agentwin/)
+[![Python](https://img.shields.io/pypi/pyversions/agentwin.svg)](https://pypi.org/project/agentwin/)
+[![License](https://img.shields.io/pypi/l/agentwin.svg)](https://github.com/xiaoka76/agentwin/blob/main/LICENSE)
+[![CI](https://github.com/xiaoka76/agentwin/actions/workflows/ci.yml/badge.svg)](https://github.com/xiaoka76/agentwin/actions)
+
 **Agent-friendly Windows remote management CLI** — a `uv tool` for AI agents to remotely manage Windows machines via WinRM or SSH.
 
 ---
@@ -12,13 +17,55 @@
 
 ### Installation
 
+#### 🚀 For AI agents: one-liner install
+
+If you are an AI agent setting up `agentwin` for your user, run this **single command** (it auto-installs `uv` if missing, then installs `agentwin`):
+
 ```bash
-# Install from source (development)
+curl -LsSf https://astral.sh/uv/install.sh | sh && uv tool install agentwin && agentwin --version
+```
+
+That's it — no interactive prompts, no dependencies to figure out. The tool is now available as the `agentwin` command.
+
+#### Recommended: `uv tool install`
+
+```bash
+# Install uv (if not already installed)
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# Install agentwin
+uv tool install agentwin
+
+# Verify
+agentwin --version
+```
+
+#### npx-style: `uvx` (run without installing)
+
+`uvx` is the Python equivalent of `npx` — it downloads, runs, and discards. Perfect for one-off commands or trying it out:
+
+```bash
+# Run any subcommand without globally installing
+uvx agentwin health 10.0.0.20
+uvx agentwin sysinfo --host <uuid>
+uvx agentwin --help
+
+# Always use the latest version
+uvx --from agentwin agentwin --version
+```
+
+#### Alternative: `pipx`
+
+```bash
+pipx install agentwin
+```
+
+#### From source (for contributors)
+
+```bash
+git clone https://github.com/xiaoka76/agentwin.git
 cd agentwin
 uv tool install -e .
-
-# Or from PyPI (once published)
-uv tool install agentwin
 ```
 
 ### Quick Start
@@ -129,13 +176,55 @@ Full: /home/user/.config/agentwin/runs/a1b2c3d4/2026-07-12T22-30-15Z_sysinfo.md
 
 ### 安装
 
+#### 🚀 给 AI agent 的一键安装
+
+如果你是 AI agent，要为你的用户装 `agentwin`，**一行命令搞定**（缺 `uv` 就自动装，完了装 `agentwin`）：
+
 ```bash
-# 从源码安装（开发模式）
+curl -LsSf https://astral.sh/uv/install.sh | sh && uv tool install agentwin && agentwin --version
+```
+
+完事——没有交互提示，没有依赖要操心。装完 `agentwin` 命令就能用了。
+
+#### 推荐：`uv tool install`
+
+```bash
+# 装 uv（如果还没装）
+curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# 装 agentwin
+uv tool install agentwin
+
+# 验证
+agentwin --version
+```
+
+#### npx 风格：`uvx`（免安装直接跑）
+
+`uvx` 是 Python 的 `npx`——下载、运行、丢弃。适合临时跑命令或先体验一下：
+
+```bash
+# 不用全局装，直接跑任何子命令
+uvx agentwin health 10.0.0.20
+uvx agentwin sysinfo --host <uuid>
+uvx agentwin --help
+
+# 始终用最新版本
+uvx --from agentwin agentwin --version
+```
+
+#### 备选：`pipx`
+
+```bash
+pipx install agentwin
+```
+
+#### 从源码装（贡献者用）
+
+```bash
+git clone https://github.com/xiaoka76/agentwin.git
 cd agentwin
 uv tool install -e .
-
-# 或从 PyPI 安装（发布后）
-uv tool install agentwin
 ```
 
 ### 快速开始
